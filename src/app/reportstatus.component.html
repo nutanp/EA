@@ -1,0 +1,60 @@
+<div class="container-fluid">
+        <div class="page-header row" style="background-color:white;width:100%;margin-top:0px;border-radius:5px;">
+            <div class="col-md-1"><img src="/assets/cisco.gif" width="90" height="90"></div>
+            <div class="col-md-9">
+                <h3 style="color:gray;">ENTERPRISE AGREEMENT <br/> MANAGEMENT</h3>
+            </div>
+            <div class="col-md-2" style="margin-top:30px;">
+                <a href="https://tab-app-116-p.cisco.com/#/site/CDOanalytics/views/EnterpiseAgreementProspectingTool_0/CiscoONEEAProspecting" class="btn btn-success">Back to Prospecting</a>                   
+            </div>
+        </div>
+        <div class="headerBlue" style="background-color:#005072;padding:3px;width:100%;border-radius:5px;">
+            <h4 style="text-align:center; color:#70EAFA"> Report Status </h4>
+        </div>
+    
+        <div class="row">
+            <div class="col-md-12">
+                <div class="col-md-2"></div>
+                <div class="col-md-7">
+                    <div style="text-align:left" >
+                        <input class="form-control" (keyup.enter)="getReportStatusForProspectID(searchText.value)" #searchText [(ngModel)]="textValue" type="text" placeholder="Enter Prospect Reference ID ... " style="background-color:white; text-align:center; margin-top:25px; border-radius:3px;height:35px;">
+                    </div> 
+                </div>
+                <div class="col-md-1"><button style="margin-top:25px" (click)="getReportStatusForProspectID(searchText.value)" class="btn btn-primary btn-md">
+                            <span class="glyphicon glyphicon-search"></span> 
+                          </button></div>
+                          <div class="col-md-2" style="margin-top:25px;">
+                                <button class="btn btn-success" (click)="getReportStatusForProspectID(searchText.value)">Refresh</button>
+                              </div>
+            </div>
+        </div><br/>
+        <div class="row" *ngIf="showreporttable" style="background-color:aliceblue;border-radius:5px;margin:10px;">
+          <div class="col-md-10">
+            <table>
+              <thead>
+                <th style="color:black;padding:20px">Prospect Reference ID</th>
+                <th style="color:black;padding:20px">Status</th>
+                <th style="color:black;padding:20px">CEC ID</th>
+                <th style="color:black;padding:20px;text-align:center">IBA Link </th>
+                <th style="color:black;padding:20px;text-align:center">TCV TCO Link</th>
+                <th style="color:black;padding:20px">Updated Date</th>
+                <th style="color:black;padding:20px">Updated By</th> 
+              </thead>
+              <tbody>
+                <tr> 
+                <td style="color:#1280A6;padding:20px;font-weight:bold">{{reportLinks.PROSPECT_REFERENCE_ID}}</td>
+                <td style="color:#1280A6;padding:20px;font-weight:bold">{{reportLinks.STATUS}}</td>
+                <td style="color:#1280A6;padding:20px;font-weight:bold">{{reportLinks.CEC_ID}}</td>
+                <td style="color:#1280A6;padding:20px;font-weight:bold"><a (click)="downloadLink(reportLinks.IBA_DOCUMENT_NAME)">{{IBA_DOCUMENT_NAME}}</a></td>
+                <td style="color:#1280A6;padding:20px;font-weight:bold"><a (click)="downloadLink(reportLinks.TCV_TCO_DOCUMENT_NAME)">{{TCV_TCO_DOCUMENT_NAME}}</a></td>
+                
+                <td style="color:#1280A6;padding:20px;font-weight:bold">{{reportLinks.UPDATE_DATE}}</td>
+                
+                <td style="color:#1280A6;padding:20px;font-weight:bold">{{reportLinks.UPDATED_BY}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+        </div>
+      </div>

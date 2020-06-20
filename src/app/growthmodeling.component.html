@@ -1,0 +1,1004 @@
+<head>
+  <style type="text/css">
+    .altCol {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .altCol tr {
+      background: white;
+    }
+
+    .altCol tr td:nth-child(odd) {
+      background: #f6f6f6;
+    }
+
+    .altCol tr td:nth-child(even) {
+      background: #ededed;
+    }
+  </style>
+</head>
+<div class="container-fluid">
+  <div class="page-header row" style="background-color:white;width:100%;margin-top:0px;border-radius:5px;">
+    <div class="col-md-1"><img src="/assets/cisco.gif" width="90" height="90"></div>
+    <div class="col-md-9">
+      <h3 style="color:gray;">ENTERPRISE AGREEMENT <br/> MANAGEMENT</h3>
+    </div>
+    <!-- <div class="col-md-2" *ngIf="cedValidationMessage" style="margin-top:30px;font-size:16px;color:red;">{{cedValidationMessage}}</div> -->
+    <div class="col-md-2" style="margin-top:30px;">
+      <a href="https://tab-app-116-p.cisco.com/#/site/CDOanalytics/views/EnterpiseAgreementProspectingTool_0/CiscoONEEAProspecting"
+        class="btn btn-success">Back to Prospecting</a>
+    </div>
+  </div>
+  <div class="headerBlue" style="background-color:#005072;padding:2px;margin-top:-10px;width:100%;border-radius:5px;">
+    <h4 style="color:#70EAFA; text-align:center; font-weight:bold">{{guName}} </h4>
+    <h4 style="color:white; text-align:center;"> Pre-Selected GU IDs - {{cpid.preselectedGUIDs}}</h4>
+  </div>
+  <div class="row">
+    <div class="page-header col-md-12" style="color:#005072; margin-top:0px;margin-left:10px;">
+      <div class="col-md-3" style="color:#005072; margin-top:15px;margin-left:-10px;">
+        <h5 style="font-weight:bold">Prospect Reference ID : {{cpid.prospectID}}</h5>
+      </div>
+      <div class="col-md-1"></div>
+      <div class="col-md-3" style="color:#005072; margin-top:0px;margin-left:10px;">
+        <input *ngIf="custDef" [(ngModel)]="prefname" required type="text" placeholder="Enter Prospect Name " style="background-color:aliceblue; text-align:center; margin-top:15px; border-radius:3px;height:30px;">
+        <label *ngIf="nonCustDef" style="text-align:center; margin-top:10px;"><h5 style="font-weight:bold">Prospect Ref Name : {{prefname}}</h5></label>
+      </div>
+      <div class="col-md-3">
+        <input [(ngModel)]="cecid" type="text" placeholder="Enter CEC ID" required style="background-color:aliceblue; text-align:center; margin-top:15px; border-radius:3px;height:30px;">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <!-- <div *ngIf="cpid.preselectedGUIDs" style="text-align:left;margin-left:30px;margin-top:-15px;">
+          <h5 style="font-weight:bold"> Pre-Selected GU IDs - {{cpid.preselectedGUIDs}}</h5>
+        </div> -->
+      </div>
+      <div [ngBusy]="busyConfig"></div>
+    </div>
+    <div class="col-md-12">
+      <div id="tabEA" class="tab-content">
+        <ul class="nav nav-tabs">
+          <li class="active"><a href="#managecustomer" data-toggle="tab" style="color:#1280A6;font-weight:bold;">Customer Definition</a></li>
+          <li><a href="#configuresuite" *ngIf="!nextSuite" data-toggle="tab" style="color:#1280A6;font-weight:bold;">Suite Selection</a></li>
+          <li><a href="#growthparameters" *ngIf="!nextGP" data-toggle="tab" style="color:#1280A6;font-weight:bold;">Pricing & Growth Parameters</a></li>
+          <li><a href="#growthmodeling" *ngIf="!nextGM" data-toggle="tab" style="color:#1280A6;font-weight:bold;">TCV Price Estimate</a></li>
+        </ul>
+
+        <div class="tab-content">
+          <div id="managecustomer" class="tab-pane fade in active" style="background-color:#F4F4F4; border-radius:10px; margin:5px; padding:10px;">
+            <div class="row">
+              <div class="col-md-9">
+
+              </div>
+              <div class="col-md-3">
+                <button class="btn btn-success" (click)="saveCustDef(prefname)" style="float: right;">Next</button>
+              </div>
+            </div>
+            <label>Select filter criteria :</label>
+            <select (input)="onInput($event)" style="height:30px;border-radius:3px;vertical-align: bottom;">
+              <option value="default">~ choose criteria ~</option>
+              <option value="crgupartyname">Install Site CR GU Party Name</option>
+              <option value="crgupartyid">Install Site CR GU Party ID</option>
+              <option value="crparentpartyname">Install Site CR Parent Party Name</option>
+              <option value="crparentpartyid">Install Site CR Parent Party ID</option>
+              <option value="installsitecrpartyname">Install Site CR Party Name</option>
+              <option value="installsitecrpartyid">Install Site CR Party ID</option>
+            </select>
+
+            <button class="btn btn-primary btn-sm" style="font-weight:bold" type="button" (click)="modal1.show()">Launch </button>
+            <app-modal #modal1>
+              <div class="app-modal-header">
+                <div [ngBusy]="busyConfig"></div>
+                <p style="text-align:center"><input #searchText (keyup.enter)="show(searchText.value)" [(ngModel)]="textValue" type="text" placeholder="Search ... "
+                    style="background-color:white; text-align:center; border-radius:3px;height:35px;">
+                  <button (click)="show(searchText.value)" class="btn btn-primary btn-md">
+            <span class="glyphicon glyphicon-search"></span> 
+          </button>
+                </p>
+              </div>
+              <div class="app-modal-body" style="height:390px; width:600px; overflow:auto;" *ngIf="showHide">
+                <form [formGroup]="myForm">
+                  <table *ngIf="showcrgu" class="table table-striped">
+                    <thead align="right">
+                      <tr>
+                        <th></th>
+                        <th style="color:#1280A6">CR GU ID</th>
+                        <th style="color:#1280A6">CR GU Name</th>
+                        <th style="color:#1280A6">HQ ID</th>
+                        <th style="color:#1280A6">Country</th>
+                        <th style="color:#1280A6">Address</th>
+                      </tr>
+                    </thead>
+                    <tr *ngFor="let datum of dataGU">
+                      <td><input type="checkbox" name="datum.GU_PARTY_SSOT_PARTY_ID_INT" value="datum.GU_PARTY_SSOT_PARTY_ID_INT"
+                          (change)="onChange(datum.GU_PARTY_SSOT_PARTY_ID_INT,datum.GU_PRIMARY_NAME, $event.target.checked)"></td>
+                      <td>
+                        <div style="display: inline-block; width: 40px; font-size:10px;">{{datum.GU_PARTY_SSOT_PARTY_ID_INT}}</div>
+                      </td>
+                      <td>
+                        <div style="display: inline-block; width: 80px; font-size:10px;">{{datum.GU_PRIMARY_NAME}}</div>
+                      </td>
+                      <td>
+                        <div style="display: inline-block; width: 40px; font-size:10px;">{{datum.HQ_PARTY_SSOT_PARTY_ID_INT}}</div>
+                      </td>
+                      <td>
+                        <div style="display: inline-block; width: 20px; font-size:10px;">{{datum.BRANCH_ISO_COUNTRY_CD}}</div>
+                      </td>
+                      <td>
+                        <div style="display: inline-block; width: 100px; font-size:10px;">{{datum.ADDRESS}}</div>
+                      </td>
+                    </tr>
+                  </table>
+                  <table *ngIf="showcrpp" class="table table-striped">
+                    <thead align="right">
+                      <tr>
+                        <th></th>
+                        <th style="color:#1280A6">HQ ID</th>
+                        <th style="color:#1280A6">HQ Name</th>
+                        <th style="color:#1280A6">Branch ID</th>
+                        <th style="color:#1280A6">Country</th>
+                        <th style="color:#1280A6">Address</th>
+                      </tr>
+                    </thead>
+                    <tr *ngFor="let datum of dataHQ">
+                      <td><input type="checkbox" name="datum.HQ_PARTY_SSOT_PARTY_ID_INT" value="datum.HQ_PARTY_SSOT_PARTY_ID_INT"
+                          (change)="onChange(datum.HQ_PARTY_SSOT_PARTY_ID_INT, datum.HQ_PRIMARY_NAME , $event.target.checked)"></td>
+                      <td>
+                        <div style="display: inline-block; width: 40px; font-size:10px;">{{datum.HQ_PARTY_SSOT_PARTY_ID_INT}}</div>
+                      </td>
+                      <td>
+                        <div style="display: inline-block; width: 80px; font-size:10px;">{{datum.HQ_PRIMARY_NAME}}</div>
+                      </td>
+                      <td>
+                        <div style="display: inline-block; width: 40px; font-size:10px;">{{datum.BRANCH_PARTY_SSOT_PARTY_ID_INT}}</div>
+                      </td>
+                      <td>
+                        <div style="display: inline-block; width: 20px; font-size:10px;">{{datum.BRANCH_ISO_COUNTRY_CD}}</div>
+                      </td>
+                      <td>
+                        <div style="display: inline-block; width: 100px; font-size:10px;">{{datum.ADDRESS}}</div>
+                      </td>
+                    </tr>
+                  </table>
+                  <table *ngIf="showsitecr" class="table table-striped">
+                    <thead align="right">
+                      <tr>
+                        <th></th>
+                        <th style="color:#1280A6">Install Site ID</th>
+                        <th style="color:#1280A6">Install Site Name</th>
+                        <th style="color:#1280A6">HQ ID</th>
+                        <th style="color:#1280A6">Country</th>
+                        <th style="color:#1280A6">Address</th>
+                      </tr>
+                    </thead>
+                    <tr *ngFor="let datum of dataIS">
+                      <td>
+                        <input type="checkbox" name="datum.BRANCH_PARTY_SSOT_PARTY_ID_INT" value="datum.BRANCH_PARTY_SSOT_PARTY_ID_INT" (change)="onChange(datum.BRANCH_PARTY_SSOT_PARTY_ID_INT,datum.BRANCH_PRIMARY_NAME, $event.target.checked)"></td>
+                      <td>
+                        <div style="display: inline-block; width: 40px; font-size:10px;">{{datum.BRANCH_PARTY_SSOT_PARTY_ID_INT}}</div>
+                      </td>
+                      <td>
+                        <div style="display: inline-block; width: 80px; font-size:10px;">{{datum.BRANCH_PRIMARY_NAME}}</div>
+                      </td>
+                      <td>
+                        <div style="display: inline-block; width: 40px; font-size:10px;">{{datum.HQ_PARTY_SSOT_PARTY_ID_INT}}</div>
+                      </td>
+                      <td>
+                        <div style="display: inline-block; width: 20px; font-size:10px;">{{datum.BRANCH_ISO_COUNTRY_CD}}</div>
+                      </td>
+                      <td>
+                        <div style="display: inline-block; width: 100px; font-size:10px;">{{datum.ADDRESS}}</div>
+                      </td>
+                    </tr>
+                  </table>
+                </form>
+              </div>
+              <div class="app-modal-footer">
+                <button type="button" (click)="textValue=''" class="btn btn-default" (click)="modal1.hide()">Close</button>
+                <button type="button" (click)="textValue=''" class="btn btn-primary" (click)="modal1.hide()">Use selected addresses</button>
+              </div>
+            </app-modal>
+
+            <div *ngIf="showCardsVar">
+              <div class="row">
+                <div class="col-md-12" style="padding-top:20px;">
+                  <div *ngIf="guCards" class="col-md-4" style="text-align:center"><label style="color:#1280A6;font-size:15px">Global Ultimate</label></div>
+                  <div *ngIf="hqCards" class="col-md-4" style="text-align:center"><label style="color:#1280A6;font-size:15px">Head Quarter</label></div>
+                  <div *ngIf="isCards" class="col-md-4" style="text-align:center"><label style="color:#1280A6;font-size:15px">Install Site</label></div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="col-md-4" *ngIf="guCards">
+                    <app-card *ngFor=" let oneGU of criteriaArray1.value; let i = index">
+                      <div class="app-card-data">
+                        <label>{{selectedGUName.value[i]}} &nbsp; ({{oneGU}}) &nbsp;<a (click) = "removeGUIDs(oneGU,selectedGUName.value[i])" class="glyphicon glyphicon-remove" style="color:#800000" aria-hidden="true"></a></label>
+                      </div>
+                    </app-card>
+                  </div>
+                  <div class="col-md-4" *ngIf="hqCards">
+                    <app-card *ngFor="let oneHQ of myForm.value.selectedCheckbox2; let i = index">
+                      <div class="app-card-data">
+                        <label> {{selectedHQName.value[i]}} &nbsp; ({{oneHQ}}) &nbsp; <a (click) = "removeHQIDs(oneHQ,selectedHQName.value[i])" class="glyphicon glyphicon-remove" style="color:#800000" aria-hidden="true"></a></label>
+                      </div>
+                    </app-card>
+                  </div>
+                  <div class="col-md-4" *ngIf="isCards">
+                    <app-card *ngFor="let oneIS of myForm.value.selectedCheckbox3; let i = index">
+                      <div class="app-card-data">
+                        <label>{{selectedISName.value[i]}} &nbsp; ({{oneIS}}) &nbsp; <a (click) = "removeISIDs(one,selectedISName.value[i])" class="glyphicon glyphicon-remove" style="color:#800000" aria-hidden="true"></a> </label>
+                      </div>
+                    </app-card>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="configuresuite" class="tab-pane fade" style="background-color:#F4F4F4; border-radius:10px; margin:5px; padding:10px;">
+            <form [formGroup]="suiteForm">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="col-md-10">
+                  </div>
+                  <div class="col-md-2"><button class="btn btn-success" (click)="saveSuite()" style="float: right;">Next</button></div>
+                </div>
+              </div>
+              <div>
+                <table class="table table-striped">
+                  <tr>
+                    <td><input type="checkbox" [checked]="accessswitchingCheck" formControlName="accessswitching" [value]="accessswitchingCheck"
+                      />&nbsp;</td>
+                    <td>
+                      <h5>ACCESS - SWITCHING</h5>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox" [checked]="accesswirelessCheck" formControlName="accesswireless" [value]="accesswirelessCheck"
+                      />&nbsp;</td>
+                    <td>
+                      <h5>ACCESS - WIRELESS</h5>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox" [checked]="dccomputeCheck" formControlName="dccompute" [value]="dccomputeCheck"
+                      />&nbsp;</td>
+                    <td>
+                      <h5>DATA CENTER - COMPUTE</h5>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox" [checked]="dcnetworkingCheck" formControlName="dcnetworking" [value]="dcnetworkingCheck"
+                      />&nbsp;</td>
+                    <td>
+                      <h5>DATA CENTER - NETWORKING</h5>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox" [checked]="wanCheck" formControlName="wan" [value]="wanCheck" />&nbsp;</td>
+                    <td>
+                      <h5>WAN</h5>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </form>
+          </div>
+          <div id="growthparameters" class="tab-pane fade" style="background-color:#F4F4F4; border-radius:10px; margin:5px; padding:10px;">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="col-md-10">
+                </div>
+                <div class="col-md-1">
+                  <button class="btn btn-success" (click)="saveGP(ashd.value, awhd.value, dcchd.value, dcnhd.value, wanhd.value,
+              ashsd.value, awhsd.value, dcchsd.value, dcnhsd.value, wanhsd.value, assd.value, awsd.value, dccsd.value,
+              dcnsd.value, wansd.value, asswssd.value, awswssd.value, dccswssd.value, dcnswssd.value, wanswssd.value, asad.value, 
+              awad.value, dcnad.value, wanad.value, asgr.value, awgr.value, dccgr.value, dcngr.value, wangr.value, hwrefreshrate.value)"
+                    style="float: right;">Save Params</button>
+                </div>
+
+                <div *ngIf="next" class="col-md-1"><button class="btn btn-success" (click)="getIBTCVQtyData()">Next</button></div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="col-md-3">
+                  <label for="sel1" style="color:#1280A6">Term duration (years)</label>
+                  <select [(ngModel)]="modelTerm" (input)="onTermSelection($event)" class="form-control" id="sel1" style="width:50%">                     
+                      <option selected="selected" value="3">3</option>
+                      <option value="5">5</option>
+                    </select>
+                </div>
+                <!-- <div class="col-md-3">
+                  <label style="color:#1280A6">ELA Start Date</label>
+                  <my-date-picker name="mydate" [options]="myDatePickerInlineOptions" (dateChanged)="onDateChanged($event)" [selDate]="selDate"
+                    required></my-date-picker>
+                </div> -->
+
+                <div class="col-md-3">
+                  <label style="color:#1280A6">ELA Start Date</label>
+                  <my-date-picker name="mydate" [options]="myDatePickerInlineOptions" [selDate]="elaStartDate" ng-model="elaStartDate" (dateChanged)="onDateChanged($event)"
+                    required></my-date-picker>
+                </div>
+
+                <div class="col-md-3">
+                  <label style="color:#1280A6">Country of Transaction</label>
+                  <select (input)="onCountrySelection($event)" [(ngModel)]="selectedCountry" class="form-control" style="width:50%">
+                        <option *ngFor="let country of dataGetCountry" value="{{country.COUNTRY}}">{{country.COUNTRY}}</option>
+                      </select>
+                </div>
+                <div class="col-md-3">
+                  <label style="color:#1280A6">Pre-Paid / Annual</label>
+                  <select [(ngModel)]="modelPayment" (input)="onPrepaySelection($event)" class="form-control" style="width:50%">                        
+                        <option selected="selected" value="Pre-paid">Pre-paid</option>
+                        <option value="Annual">Annual</option>
+                      </select>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class='col-sm-12'>
+                <div class="form-group">
+                  <!-- <div style="text-align:center" class="alert-warning alert" *ngIf="growthParamsForm.dirty">
+                    <strong>Warning!</strong> Please save changes.
+                  </div> -->
+                  <div style="text-align:center" class="alert-warning alert" *ngIf="growthParamsFormDropDown">
+                    <strong>Warning!</strong> Please save changes.
+                  </div>
+                  <table id="growthparam" width="100%">
+                    <tr>
+                      <td></td>
+                      <td style="padding: 5px; font-weight:bold" align="center">Access - Switching</td>
+                      <td style="padding: 5px; font-weight:bold" align="center">Access - Wireless</td>
+                      <td style="padding: 5px; font-weight:bold" align="center">Data Center - Compute</td>
+                      <td style="padding: 5px; font-weight:bold" align="center">Data Center - Networking</td>
+                      <td style="padding: 5px; font-weight:bold" align="center">Wan</td>
+                    </tr>
+                    <tr>
+                      <td><label for="sel1" style="color:#1280A6">Software Discount %</label></td>
+                      <td style="padding: 5px">
+                        <form #growthParamsForm="ngForm">
+                          <input #assd="ngModel" name="assd" [(ngModel)]="assdsaveGP" [disabled]="!accessswitchingCheck" type='text' class="form-control"
+                            value="50" required validateDiscount/>
+                          <p style="color:red; text-align:center; ">{{assd.errors?.validateDiscount}}</p>
+                        </form>
+                      </td>
+                      <td style="padding: 5px"><input #awsd="ngModel" [(ngModel)]="awsdsaveGP" [disabled]="!accesswirelessCheck" type='text' class="form-control"
+                          value="50" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{awsd.errors?.validateDiscount}}</p>
+                      </td>
+                      <td style="padding: 5px"><input #dccsd="ngModel" [(ngModel)]="dccsdsaveGP" [disabled]="!dccomputeCheck" type='text' class="form-control"
+                          value="50" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{dccsd.errors?.validateDiscount}}</p>
+                      </td>
+                      <td style="padding: 5px"><input #dcnsd="ngModel" [(ngModel)]="dcnsdsaveGP" [disabled]="!dcnetworkingCheck" type='text' class="form-control"
+                          value="50" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{dcnsd.errors?.validateDiscount}}</p>
+                      </td>
+                      <td style="padding: 5px"><input #wansd="ngModel" [(ngModel)]="wansdsaveGP" [disabled]="!wanCheck" type='text' class="form-control"
+                          value="50" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{wansd.errors?.validateDiscount}}</p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><label for="sel1" style="color:#1280A6">SWSS Discount %</label></td>
+                      <td style="padding: 5px"><input #asswssd="ngModel" [(ngModel)]="asswssdsaveGP" [disabled]="!accessswitchingCheck" type='text'
+                          class="form-control" value="23" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{asswssd.errors?.validateDiscount}}</p>
+                      </td>
+                      <td style="padding: 5px"><input #awswssd="ngModel" [(ngModel)]="awswssdsaveGP" [disabled]="!accesswirelessCheck" type='text'
+                          class="form-control" value="23" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{awswssd.errors?.validateDiscount}}</p>
+                      </td>
+                      <td style="padding: 5px"><input #dccswssd="ngModel" [(ngModel)]="dccswssdsaveGP" [disabled]="!dccomputeCheck" type='text' class="form-control"
+                          value="23" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{dccswssd.errors?.validateDiscount}}</p>
+                      </td>
+                      <td style="padding: 5px"><input #dcnswssd="ngModel" [(ngModel)]="dcnswssdsaveGP" [disabled]="!dcnetworkingCheck" type='text'
+                          class="form-control" value="23" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{dcnswssd.errors?.validateDiscount}}</p>
+                      </td>
+                      <td style="padding: 5px"><input #wanswssd="ngModel" [(ngModel)]="wanswssdsaveGP" [disabled]="!wanCheck" type='text' class="form-control"
+                          value="23" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{wanswssd.errors?.validateDiscount}}</p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><label for="sel1" style="color:#1280A6">Advanced Deployment %</label></td>
+                      <td style="padding: 5px">
+                        <select #asad [(ngModel)]="asadsaveGP" [disabled]="!accessswitchingCheck" class="form-control">  
+                      <option *ngFor="let item of numbers" value="{{item.item}}">{{item.item}}</option>  
+                      </select></td>
+                      <td style="padding: 5px"> <select #awad [(ngModel)]="awadsaveGP" [disabled]="!accesswirelessCheck" class="form-control">
+                      
+                      <option selected="selected" value="0">0</option>
+                      
+                      <option value="100">100</option>
+                      
+                      </select> </td>
+
+                      <td style="padding: 5px"><input type='text' class="form-control" value="0" disabled/></td>
+
+                      <td style="padding: 5px">
+
+                        <select #dcnad [(ngModel)]="dcnadsaveGP" [disabled]="!dcnetworkingCheck" class="form-control">
+                      
+                      <option *ngFor="let item of newnumbers" value="{{item.item}}">{{item.item}}</option>
+                      
+                      </select></td>
+
+                      <td style="padding: 5px"><input #wanad="ngModel" [(ngModel)]="wanadsaveGP" [disabled]="!wanCheck" type='text' class="form-control"
+                          style="margin-top:2mm;" required validateDiscount />
+                        <p style="color:red; text-align:center;">{{wanad.errors?.validateDiscount}}</p>
+                      </td>
+
+                    </tr>
+                    <br/>
+                    <tr>
+                      <td style="color:#1280A6;font-weight:bold">Hardware Refresh Rate (# of Years)</td>
+                      <td style="padding: 5px"><input #hwrefreshrate [(ngModel)]="hrrsaveGP" type='text' class="form-control" /></td>
+                    </tr>
+                    <tr>
+                      <td></td>
+                      <td style="padding: 5px; font-weight:bold" align="center">Access - Switching</td>
+                      <td style="padding: 5px; font-weight:bold" align="center">Access - Wireless</td>
+                      <td style="padding: 5px; font-weight:bold" align="center">Data Center - Compute</td>
+                      <td style="padding: 5px; font-weight:bold" align="center">Data Center - Networking</td>
+                      <td style="padding: 5px; font-weight:bold" align="center">Wan</td>
+                    </tr>
+                    <tr>
+                      <td><label for="sel1" style="color:#1280A6">TCO Growth Rate % (cumulative/year)</label></td>
+                      <td style="padding: 5px"><input #asgr="ngModel" [(ngModel)]="asgrsaveGP" [disabled]="!accessswitchingCheck" type='text' class="form-control"
+                          required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{asgr.errors?.validateDiscount}}</p>
+                      </td>
+                      <td style="padding: 5px"><input #awgr="ngModel" [(ngModel)]="awgrsaveGP" [disabled]="!accesswirelessCheck" type='text' class="form-control"
+                          required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{awgr.errors?.validateDiscount}}</p>
+                      </td>
+
+
+                      <td style="padding: 5px"><input #dccgr="ngModel" [(ngModel)]="dccgrsaveGP" [disabled]="!dccomputeCheck" type='text' class="form-control"
+                          required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{dccgr.errors?.validateDiscount}}</p>
+                      </td>
+
+
+                      <td style="padding: 5px"><input #dcngr="ngModel" [(ngModel)]="dcngrsaveGP" [disabled]="!dcnetworkingCheck" type='text' class="form-control"
+                          required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{dcngr.errors?.validateDiscount}}</p>
+                      </td>
+
+
+                      <td style="padding: 5px"><input #wangr="ngModel" [(ngModel)]="wangrsaveGP" [disabled]="!wanCheck" type='text' class="form-control"
+                          required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{wangr.errors?.validateDiscount}}</p>
+                      </td>
+
+
+                    </tr>
+                    <tr>
+                      <td><label for="sel1" style="color:#1280A6">Hardware Discount %</label></td>
+                      <td style="padding: 5px"><input #ashd="ngModel" [(ngModel)]="ashdsaveGP" [disabled]="!accessswitchingCheck" type='text' class="form-control"
+                          value="50" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{ashd.errors?.validateDiscount}}</p>
+                      </td>
+
+
+                      <td style="padding: 5px"><input #awhd="ngModel" [(ngModel)]="awhdsaveGP" [disabled]="!accesswirelessCheck" type='text' class="form-control"
+                          value="50" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{awhd.errors?.validateDiscount}}</p>
+                      </td>
+
+
+                      <td style="padding: 5px"><input #dcchd="ngModel" [(ngModel)]="dcchdsaveGP" [disabled]="!dccomputeCheck" type='text' class="form-control"
+                          value="50" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{dcchd.errors?.validateDiscount}}</p>
+                      </td>
+
+
+                      <td style="padding: 5px"><input #dcnhd="ngModel" [(ngModel)]="dcnhdsaveGP" [disabled]="!dcnetworkingCheck" type='text' class="form-control"
+                          value="50" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{dcnhd.errors?.validateDiscount}}</p>
+                      </td>
+
+
+                      <td style="padding: 5px"><input #wanhd="ngModel" [(ngModel)]="wanhdsaveGP" [disabled]="!wanCheck" type='text' class="form-control"
+                          value="50" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{wanhd.errors?.validateDiscount}}</p>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td><label for="sel1" style="color:#1280A6">Hardware Service Discount %</label></td>
+
+
+                      <td style="padding: 5px"><input #ashsd="ngModel" [(ngModel)]="ashsdsaveGP" [disabled]="!accessswitchingCheck" type='text' class="form-control"
+                          value="23" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{ashsd.errors?.validateDiscount}}</p>
+                      </td>
+
+
+                      <td style="padding: 5px"><input #awhsd="ngModel" [(ngModel)]="awhsdsaveGP" [disabled]="!accesswirelessCheck" type='text' class="form-control"
+                          value="23" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{awhsd.errors?.validateDiscount}}</p>
+                      </td>
+
+
+                      <td style="padding: 5px"><input #dcchsd="ngModel" [(ngModel)]="dcchsdsaveGP" [disabled]="!dccomputeCheck" type='text' class="form-control"
+                          value="23" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{dcchsd.errors?.validateDiscount}}</p>
+                      </td>
+
+
+                      <td style="padding: 5px"><input #dcnhsd="ngModel" [(ngModel)]="dcnhsdsaveGP" [disabled]="!dcnetworkingCheck" type='text' class="form-control"
+                          value="23" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{dcnhsd.errors?.validateDiscount}}</p>
+                      </td>
+                      <td style="padding: 5px"><input #wanhsd="ngModel" [(ngModel)]="wanhsdsaveGP" [disabled]="!wanCheck" type='text' class="form-control"
+                          value="23" required validateDiscount/>
+                        <p style="color:red; text-align:center;">{{wanhsd.errors?.validateDiscount}}</p>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="growthmodeling" class="tab-pane fade" style="background-color:#F4F4F4; border-radius:10px; margin:5px; padding:10px;width:150%;">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="col-md-2"></div>
+                <div class="col-md-3">
+                  <h5 style="text-align:center; font-weight:bold">IB Quantity</h5>
+                </div>
+                <div class="col-md-4" style="padding-bottom:5px">
+                  <button class="btn btn-success" (click)=updateManualQty();>Recalculate TCV</button>
+                  <button *ngIf="submit" class="btn btn-success" (click)="enterReportEntryFunction(cecid)">Email Reports</button>
+                </div>
+                <div class="col-md-3">
+                  <h5 style="text-align:left; font-weight:bold">Manual Quantity Update</h5>
+                </div>
+              </div>
+            </div>
+            <div class="row" style="width:100%">
+              <div class="col-md-12">
+                <div class="col-md-2" style="width:15%">
+                  <table>
+                    <thead align="right">
+                      <tr>
+                        <th style="color:#1280A6; padding:5px;">Suite</th>
+                        <th style="color:#1280A6; padding:5px">Line Item ID</th>
+                      </tr>
+                    </thead>
+                  </table>
+                </div>
+                <div class="col-md-5" style="width:40%;background-color:aliceblue;border-radius:5px;margin-right:35px">
+                  <table style="width:100%;margin-left: -20px;">
+                    <thead align="right">
+                      <tr>
+                        <th style="color:#1280A6;padding:6px">
+                          <div style="display: inline-block; width: 80px;">Foundation Qty</div>
+                        </th>
+                        <th style="color:#1280A6;padding:6px">
+                          <div style="display: inline-block; width: 80px;">Advanced Qty</div>
+                        </th>
+                        <th style="color:#1280A6;padding:6px">
+                          <div style="display: inline-block; width: 80px;">EA Price($)</div>
+                        </th>
+                        <th style="color:#1280A6;padding:6px">
+                          <div style="display: inline-block; width: 80px;">Support Price($)</div>
+                        </th>
+                        <th style="color:#1280A6;padding:6px">
+                          <div style="display: inline-block; width: 80px;">C1 Credits($)</div>
+                        </th>
+                        <th style="color:#1280A6;padding:6px">
+                          <div style="display: inline-block; width: 80px;">Anchor Credits($)</div>
+                        </th>
+                        <th style="color:#1280A6;padding:6px">
+                          <div style="display: inline-block; width: 80px;">SWSS Credits($)</div>
+                        </th>
+                        <th style="color:#1280A6;padding:6px">
+                          <div style="display: inline-block; width: 80px;">Net TCV($)</div>
+                        </th>
+                      </tr>
+                    </thead>
+                  </table>
+                </div>
+                <div class="col-md-5" style="width:40%; background-color:#FFE4E1;border-radius:5px;">
+                  <table style="width:100%;margin-left: -20px;">
+                    <thead align="right">
+                      <tr>
+                        <th style="color:#1280A6;padding:6px">
+                          <div style="display: inline-block; width: 80px;">Foundation Qty</div>
+                        </th>
+                        <th style="color:#1280A6;padding:6px">
+                          <div style="display: inline-block; width: 80px;">Advanced Qty</div>
+                        </th>
+                        <th style="color:#1280A6;padding:6px">
+                          <div style="display: inline-block; width: 80px;">EA Price($)</div>
+                        </th>
+                        <th style="color:#1280A6;padding:6px">
+                          <div style="display: inline-block; width: 80px;">Support Price($)</div>
+                        </th>
+                        <th style="color:#1280A6;padding:6px">
+                          <div style="display: inline-block; width: 80px;">C1 Credits($)</div>
+                        </th>
+                        <th style="color:#1280A6;padding:6px">
+                          <div style="display: inline-block; width: 80px;">Anchor Credits($)</div>
+                        </th>
+                        <th style="color:#1280A6;padding:6px">
+                          <div style="display: inline-block; width: 80px;">SWSS Credits($)</div>
+                        </th>
+                        <th style="color:#1280A6;padding:6px">
+                          <div style="display: inline-block; width: 80px;">Net TCV($)</div>
+                        </th>
+                      </tr>
+                    </thead>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="row" style="width:100%">
+              <div *ngIf="accessswitchingCheck" class="headerBlue" style="margin:10px;padding:15px;background-color:#ededed;border-radius:5px">
+                <a href="#one" data-toggle="collapse" class="glyphicon glyphicon-chevron-down" style="color:#1280A6;font-weight:bold;" aria-hidden="true">ACCESS - SWITCHING</a>
+                <div class="collapse" id="one" style="border-radius:5px;background-color:#ededed">
+                  <div class="col-md-2">
+                    <tr *ngFor="let x of accessSwitchingSuites">
+                      <td style="padding:10px">{{x.LINE_ITEM_ID}}</td>
+                    </tr>
+                  </div>
+                  <div class="col-md-5" style="border-radius:5px;">
+                    <table style="background-color:aliceblue; width:100%;margin-left: -40px;">
+                      <tr *ngFor="let x of accessSwitchingSuites">
+                        <td style="padding:10px;">
+                          <div style="display: inline-block; width: 65px;">{{x.FOUNDATION_EA_QTY}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.ADVANCED_EA_QTY}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 50px;">{{x.NET_EA_LICENSE_AMOUNT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_EA_SUPPORT_PRICE}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_C1_CREDIT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 65px;">{{x.NET_ANCHOR_CREDIT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_SWSS_RESIDUAL_AMOUNT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_TCV}}</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                  <div class="col-md-5" style="border-radius:5px;">
+
+                    <table style="background-color:#FFE4E1;width:100%;margin-left: -40px;">
+                      <tr *ngFor="let x of accessSwitchingSuitesRefreshed">
+                        <td style="padding:10px"><input type="text" id="asfoundation" name="asfoundation" [(ngModel)]="x.manualFndnQty" placeholder="enter... "
+                            style="background-color:aliceblue;height:18px;width:60px"></td>
+                        <td style="padding:10px"><input type="text" id="asmanual" name="asmanual" [(ngModel)]="x.manualAdvQty" placeholder="enter ... "
+                            style="background-color:aliceblue;height:18px;width:60px"></td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 55px;">{{x.NET_EA_LICENSE_AMOUNT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_EA_SUPPORT_PRICE}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_C1_CREDIT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 55px;">{{x.NET_ANCHOR_CREDIT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_SWSS_RESIDUAL_AMOUNT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_TCV}}</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="accesswirelessCheck" class="headerBlue" style="padding:15px;margin:10px;background-color:#ededed;border-radius:5px">
+                <a href="#two" data-toggle="collapse" class="glyphicon glyphicon-chevron-down" style="color:#1280A6;font-weight:bold;" aria-hidden="true">ACCESS - WIRELESS</a>
+
+                <div class="collapse" id="two" style="border-radius:5px;padding:10px;background-color:#ededed">
+                  <div class="col-md-2">
+                    <tr *ngFor="let x of accessWirelessSuites ">
+                      <td style="padding:10px">{{x.LINE_ITEM_ID}}</td>
+                    </tr>
+                  </div>
+                  <div class="col-md-5" style="border-radius:5px;">
+                    <table style=" width:100%;margin-left: -40px;background-color:aliceblue">
+                      <tr *ngFor="let x of accessWirelessSuites">
+                        <td style="padding:10px;">
+                          <div style="display: inline-block; width: 65px;">{{x.FOUNDATION_EA_QTY}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.ADVANCED_EA_QTY}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block;  width: 50px;">{{x.NET_EA_LICENSE_AMOUNT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_EA_SUPPORT_PRICE}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_C1_CREDIT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 65px;">{{x.NET_ANCHOR_CREDIT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_SWSS_RESIDUAL_AMOUNT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_TCV}}</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                  <div class="col-md-5" style="border-radius:5px;">
+                    <table style="width:100%;margin-left: -40px;background-color:#FFE4E1">
+                      <tr *ngFor="let x of accessWirelessSuitesRefreshed">
+                        <td style="padding:10px"><input type="text" id="asfoundation" name="asfoundation" [(ngModel)]="x.manualFndnQty" placeholder="enter... "
+                            style="background-color:aliceblue;height:18px;width:60px"></td>
+                        <td style="padding:10px"><input type="text" id="asmanual" name="asmanual" [(ngModel)]="x.manualAdvQty" placeholder="enter ... "
+                            style="background-color:aliceblue;height:18px;width:60px"></td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 55px;">{{x.NET_EA_LICENSE_AMOUNT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_EA_SUPPORT_PRICE}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_C1_CREDIT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 55px;">{{x.NET_ANCHOR_CREDIT}}</div>
+                        </td>
+
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_SWSS_RESIDUAL_AMOUNT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_TCV}}</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+
+                </div>
+              </div>
+              <div *ngIf="dccomputeCheck" class="headerBlue" style="padding:15px;margin:10px;background-color:#ededed;border-radius:5px">
+                <a href="#three" data-toggle="collapse" class="glyphicon glyphicon-chevron-down" style="color:#1280A6;font-weight:bold;"
+                  aria-hidden="true">DATA CENTER-<br/>COMPUTE</a>
+
+                <div class="collapse" id="three" style="border-radius:5px;padding:10px;background-color:#ededed">
+                  <div class="col-md-12">
+                    <div class="col-md-2">
+                      <tr *ngFor="let x of dccSuites">
+                        <td style="padding:10px">{{x.LINE_ITEM_ID}}</td>
+                      </tr>
+                    </div>
+                    <div class="col-md-5" style="border-radius:5px;">
+                      <table style="width:100%;margin-left: -40px;background-color:aliceblue">
+                        <tr *ngFor="let x of dccSuites">
+                          <td style="padding:10px;">
+                            <div style="display: inline-block; width: 65px;">{{x.FOUNDATION_EA_QTY}}</div>
+                          </td>
+                          <td style="padding:10px">
+                            <div style="display: inline-block; width: 40px;">{{x.ADVANCED_EA_QTY}}</div>
+                          </td>
+                          <td style="padding:10px">
+                            <div style="display: inline-block;  width: 50px;">{{x.NET_EA_LICENSE_AMOUNT}}</div>
+                          </td>
+                          <td style="padding:10px">
+                            <div style="display: inline-block; width: 40px;">{{x.NET_EA_SUPPORT_PRICE}}</div>
+                          </td>
+                          <td style="padding:10px">
+                            <div style="display: inline-block; width: 40px;">{{x.NET_C1_CREDIT}}</div>
+                          </td>
+                          <td style="padding:10px">
+                            <div style="display: inline-block; width: 65px;">{{x.NET_ANCHOR_CREDIT}}</div>
+                          </td>
+
+                          <td style="padding:10px">
+                            <div style="display: inline-block; width: 40px;">{{x.NET_SWSS_RESIDUAL_AMOUNT}}</div>
+                          </td>
+                          <td style="padding:10px">
+                            <div style="display: inline-block; width: 40px;">{{x.NET_TCV}}</div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                    <div class="col-md-5" style="border-radius:5px;">
+                      <table style="width:100%;margin-left: -40px;background-color:#FFE4E1">
+                        <tr *ngFor="let x of dccSuites ">
+                          <td style="padding:10px"><input type="text" id="asfoundation" name="asfoundation" [(ngModel)]="x.manualFndnQty" placeholder="enter... "
+                              style="background-color:aliceblue;height:18px;width:60px"></td>
+                          <td style="padding:10px"><input type="text" id="asmanual" name="asmanual" [(ngModel)]="x.manualAdvQty" placeholder="enter ... "
+                              style="background-color:aliceblue;height:18px;width:60px"></td>
+                          <td style="padding:10px">
+                            <div style="display: inline-block; width: 55px;">{{x.NET_EA_LICENSE_AMOUNT}}</div>
+                          </td>
+                          <td style="padding:10px">
+                            <div style="display: inline-block; width: 40px;">{{x.NET_EA_SUPPORT_PRICE}}</div>
+                          </td>
+                          <td style="padding:10px">
+                            <div style="display: inline-block; width: 40px;">{{x.NET_C1_CREDIT}}</div>
+                          </td>
+                          <td style="padding:10px">
+                            <div style="display: inline-block; width: 55px;">{{x.NET_ANCHOR_CREDIT}}</div>
+                          </td>
+
+                          <td style="padding:10px">
+                            <div style="display: inline-block; width: 40px;">{{x.NET_SWSS_RESIDUAL_AMOUNT}}</div>
+                          </td>
+                          <td style="padding:10px">
+                            <div style="display: inline-block; width: 40px;">{{x.NET_TCV}}</div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="dcnetworkingCheck" class="headerBlue" style="padding:15px;margin:10px;background-color:#ededed;border-radius:5px">
+                <a href="#four" data-toggle="collapse" class="glyphicon glyphicon-chevron-down" style="color:#1280A6;font-weight:bold" aria-hidden="true">DATA CENTER-<br/>NETWORKING</a>
+
+                <div class="collapse" id="four" style="border-radius:5px;padding:10px;background-color:#ededed">
+                  <div class="col-md-2">
+                    <tr *ngFor="let x of dcnSuites">
+                      <td style="padding:10px">{{x.LINE_ITEM_ID}}</td>
+                    </tr>
+                  </div>
+                  <div class="col-md-5" style="border-radius:5px;">
+                    <table style="width:100%;margin-left: -40px; background-color:aliceblue">
+                      <tr *ngFor="let x of dcnSuites">
+                        <td style="padding:10px;">
+                          <div style="display: inline-block; width: 65px;">{{x.FOUNDATION_EA_QTY}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.ADVANCED_EA_QTY}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block;  width: 50px;">{{x.NET_EA_LICENSE_AMOUNT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_EA_SUPPORT_PRICE}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_C1_CREDIT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 65px;">{{x.NET_ANCHOR_CREDIT}}</div>
+                        </td>
+
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_SWSS_RESIDUAL_AMOUNT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_TCV}}</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                  <div class="col-md-5" style="border-radius:5px;">
+                    <table style="width:100%;margin-left: -40px;background-color:#FFE4E1">
+                      <tr *ngFor="let x of dcnSuitesRefreshed">
+                        <td style="padding:10px"><input type="text" id="asfoundation" name="asfoundation" [(ngModel)]="x.manualFndnQty" placeholder="enter... "
+                            style="background-color:aliceblue;height:18px;width:60px"></td>
+                        <td style="padding:10px"><input type="text" id="asmanual" name="asmanual" [(ngModel)]="x.manualAdvQty" placeholder="enter ... "
+                            style="background-color:aliceblue;height:18px;width:60px"></td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 55px;">{{x.NET_EA_LICENSE_AMOUNT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_EA_SUPPORT_PRICE}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_C1_CREDIT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 55px;">{{x.NET_ANCHOR_CREDIT}}</div>
+                        </td>
+
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_SWSS_RESIDUAL_AMOUNT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_TCV}}</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="wanCheck" class="headerBlue" style="padding:15px;margin:10px;background-color:#ededed;border-radius:5px">
+                <a href="#five" data-toggle="collapse" class="glyphicon glyphicon-chevron-down" style="color:#1280A6;font-weight:bold" aria-hidden="true">WAN</a>
+
+                <div class="collapse" id="five" style="border-radius:5px;padding:10px;background-color:#ededed">
+                  <div class="col-md-2">
+                    <tr *ngFor="let x of wanSuites">
+                      <td style="padding:10px">{{x.LINE_ITEM_ID}}</td>
+                    </tr>
+                  </div>
+                  <div class="col-md-5" style="border-radius:5px;">
+                    <table style="width:100%;margin-left: -40px;background-color:aliceblue">
+                      <tr *ngFor="let x of wanSuites">
+                        <td style="padding:10px;">
+                          <div style="display: inline-block; width: 65px;">{{x.FOUNDATION_EA_QTY}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.ADVANCED_EA_QTY}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block;  width: 50px;">{{x.NET_EA_LICENSE_AMOUNT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_EA_SUPPORT_PRICE}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_C1_CREDIT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 65px;">{{x.NET_ANCHOR_CREDIT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_SWSS_RESIDUAL_AMOUNT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_TCV}}</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                  <div class="col-md-5" style="border-radius:5px;">
+                    <table style="width:100%;margin-left: -40px;background-color:#FFE4E1">
+                      <tr *ngFor="let x of wanSuitesRefreshed  ; let i = index">
+                        <td style="padding:10px"><input type="text" id="asfoundation" name="asfoundation" [(ngModel)]="x.manualFndnQty" placeholder="enter... "
+                            style="background-color:aliceblue;height:18px;width:60px"></td>
+                        <td style="padding:10px"><input type="text" id="asmanual" name="asmanual" [(ngModel)]="x.manualAdvQty" placeholder="enter ... "
+                            style="background-color:aliceblue;height:18px;width:60px"></td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 55px;">{{x.NET_EA_LICENSE_AMOUNT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_EA_SUPPORT_PRICE}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_C1_CREDIT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 55px;">{{x.NET_ANCHOR_CREDIT}}</div>
+                        </td>
+
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_SWSS_RESIDUAL_AMOUNT}}</div>
+                        </td>
+                        <td style="padding:10px">
+                          <div style="display: inline-block; width: 40px;">{{x.NET_TCV}}</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,54 @@
+<div class="container-fluid">
+    <div class="page-header row" style="background-color:white;width:100%;margin-top:0px;border-radius:5px;">
+        <div class="col-md-1"><img src="/assets/cisco.gif" width="90" height="90"></div>
+        <div class="col-md-10">
+            <h3 style="color:gray;">ENTERPRISE AGREEMENT <br/> MANAGEMENT</h3>
+        </div>
+    </div>
+    <div class="headerBlue" style="background-color:#005072;padding:3px;width:100%;border-radius:5px;">
+        <h4 style="text-align:center; color:#70EAFA">Start Prospecting by GU Name </h4>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-2"><div [ngBusy]="{busy: busy, message: 'Fetching Data...', backdrop: true}"></div></div>
+            <div class="col-md-6">
+                <div style="text-align:left" >
+                    <input class="form-control" (keyup.enter)="search(searchText.value)" #searchText [(ngModel)]="textValue" type="text" placeholder="Search ... " style="background-color:white; text-align:center; margin-top:25px; border-radius:3px;height:35px;">
+                </div> 
+            </div>
+            <div class="col-md-1"><button style="margin-top:25px" (click)="search(searchText.value)" class="btn btn-primary btn-md">
+                        <span class="glyphicon glyphicon-search"></span> 
+                      </button></div>
+            <div class="col-md-2" >
+                <button [disabled] = "disableStartProspecting" style="margin-top:25px;" (click)="startProspecting()" class="btn btn-success">Start Prospecting</button>
+                
+            </div>          
+            <!-- <div class="col-md-1" >
+                    <button style="margin-top:25px;" (click)="getProspect()" class="btn btn-success">Option 2 </button>
+                </div>  -->
+        </div>
+    </div>
+    <div *ngIf="data.length > 0" style="margin-top:10px;">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th style="color:#1280A6; font-size:16px">GU Name</th>
+                    <th style="color:#1280A6;font-size:16px">GU IDs</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tr *ngFor="let datum of data">
+                <td><input type="radio" name="radiogroup" [value]="datum.INSTALL_SITE_CR_GU_NAME" (change)="onSelectionChange(datum.INSTALL_SITE_CR_GU_NAME, datum.INSTALL_SITE_CR_GU_ID)"
+                    />&nbsp;</td>
+                <td>
+                    <h5>{{datum.INSTALL_SITE_CR_GU_NAME}}</h5>
+                </td>
+                <td>{{datum.INSTALL_SITE_CR_GU_ID}}</td>
+               
+            </tr>
+        </table>
+
+    </div>
+</div>

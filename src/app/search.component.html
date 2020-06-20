@@ -1,0 +1,119 @@
+<div class="container-fluid">
+    <div class="page-header row" style="background-color:white;width:100%;margin-top:0px;border-radius:5px;">
+        <div class="col-md-1"><img src="/assets/cisco.gif" width="90" height="90"></div>
+        <div class="col-md-9">
+            <h3 style="color:gray;">ENTERPRISE AGREEMENT <br/> MANAGEMENT</h3>
+        </div>
+        <div class="col-md-2" style="margin-top:30px;">
+            <a href="https://tab-app-116-p.cisco.com/#/site/CDOanalytics/views/EnterpiseAgreementProspectingTool_0/CiscoONEEAProspecting" class="btn btn-success">Back to Prospecting</a>                   
+        </div>
+    </div>
+    <div class="headerBlue" style="background-color:#005072;padding:3px;width:100%;border-radius:5px;">
+        <h4 style="text-align:center; color:#70EAFA"> Search Prospect Reference </h4>
+    </div>
+    <div [ngBusy]="busyConfig"></div>
+    <!-- <div *ngIf="edited" style="text-align:center" class="alert alert-success box-msg" role="alert">
+            <h4><strong>Please wait till we load your data !</strong> {{(secondsDisplay) && (secondsDisplay <59) ? secondsDisplay : '00'}} </h4> 
+    </div> -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="col-md-9">
+                <div style="text-align:left"><input class="form-control" (keyup.enter)="searchByProspectID(prospectid)" [(ngModel)]="prospectid" (keydown)="onSelectionChange('pid')"
+                        type="text" placeholder="Search by Prospect ID " style="background-color:white; text-align:center; margin-top:25px; border-radius:3px;height:35px;">
+                </div>
+            </div>
+            <div class="col-md-1">
+                <button [disabled]="!pidbutton" style="margin-top:25px" (click)="searchByProspectID(prospectid)" class="btn btn-primary btn-md">
+                     <span class="glyphicon glyphicon-search"></span> </button>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="col-md-9">
+                <div style="text-align:left"><input class="form-control" (keyup.enter)="searchByProspectName(prospectname)" [(ngModel)]="prospectname"
+                        (keydown)="onSelectionChange('pname')" type="text" placeholder="Search Prospect Name " style="background-color:white; text-align:center; margin-top:25px; border-radius:3px;height:35px;">
+                </div>
+
+            </div>
+            <div class="col-md-1">
+                <button [disabled]="!pnamebutton" style="margin-top:25px" (click)="searchByProspectName(prospectname)" class="btn btn-primary btn-md">
+                       <span class="glyphicon glyphicon-search"></span> 
+                </button>
+            </div>
+
+        </div>
+        <div class="col-md-3">
+
+            <div class="col-md-9">
+                <div style="text-align:left">
+                    <input class="form-control" (keyup.enter)="searchByCRGUName(guname)" [(ngModel)]="guname" (keydown)="onSelectionChange('guname')"
+                        type="text" placeholder="Search by GU Name " style="background-color:white; text-align:center; margin-top:25px; border-radius:3px;height:35px;">
+
+                </div>
+
+            </div>
+            <div class="col-md-1">
+                <button [disabled]="!gunamebutton" style="margin-top:25px" (click)="searchByCRGUName(guname)" class="btn btn-primary btn-md">
+                            <span class="glyphicon glyphicon-search"></span> 
+                          </button>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="col-md-9">
+                <div style="text-align:left"> <input class="form-control" (keyup.enter)="searchByCRGUID(guid)" [(ngModel)]="guid" (keydown)="onSelectionChange('guid')"
+                        type="text" placeholder="Search by GU ID " style="background-color:white; text-align:center; margin-top:25px; border-radius:3px;height:35px;">
+                </div>
+            </div>
+            <div class="col-md-1">
+                <button [disabled]="!guidbutton" style="margin-top:25px" (click)="searchByCRGUID(guid)" class="btn btn-primary btn-md">
+                            <span class="glyphicon glyphicon-search"></span> 
+                          </button>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top:80px;" *ngIf="showGetProspectTable">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th style="color:black;padding:20px">Prospect Reference ID</th>
+                    <th style="color:black;padding:20px">Prospect Reference Name</th>
+                    <th style="color:black;padding:20px">Offer ID</th>
+                    <th style="color:black;padding:20px">Updated Date</th>
+                    <!-- <th style="color:black;padding:20px">Updated By</th> -->
+                </tr>
+            </thead>
+            <tr *ngFor="let datum of data">
+                <td style="color:#1280A6;padding:20px;font-weight:bold"><a (click)="getByProspectID(prospectid)">{{datum.PROSPECT_REFERENCE_ID}}</a></td>
+                <td style="color:#1280A6;padding:20px;font-weight:bold">{{datum.PROSPECT_REFERENCE_NAME}}</td>
+                <td style="color:#1280A6;padding:20px;font-weight:bold">{{datum.OFFER_ID}}</td>
+                <td style="color:#1280A6;padding:20px;font-weight:bold">{{datum.UPDATE_DATE}}</td>
+                <!-- <td style="color:#1280A6;padding:20px;font-weight:bold">{{datum.UPDATED_BY}}</td> -->
+            </tr>
+            <tr *ngFor="let datum of dataProspectName">
+                <td style="color:#1280A6;padding:20px;font-weight:bold"><a (click)="getByProspectID(datum.PROSPECT_REFERENCE_ID)">{{datum.PROSPECT_REFERENCE_ID}}</a></td>
+                <td style="color:#1280A6;padding:20px;font-weight:bold">{{datum.PROSPECT_REFERENCE_NAME}}</td>
+                <td style="color:#1280A6;padding:20px;font-weight:bold">{{datum.OFFER_ID}}</td>
+                <td style="color:#1280A6;padding:20px;font-weight:bold">{{datum.UPDATE_DATE}}</td>
+                <!-- <td style="color:#1280A6;padding:20px;font-weight:bold">{{datum.UPDATED_BY}}</td> -->
+            </tr>
+
+            <tr *ngFor="let datum of dataCRGUName">
+                <td style="color:#1280A6;padding:20px;font-weight:bold"><a (click)="getByProspectID(datum.PROSPECT_REFERENCE_ID)">{{datum.PROSPECT_REFERENCE_ID}}</a></td>
+                <td style="color:#1280A6;padding:20px;font-weight:bold">{{datum.PROSPECT_REFERENCE_NAME}}</td>
+                <td style="color:#1280A6;padding:20px;font-weight:bold">{{datum.OFFER_ID}}</td>
+                <td style="color:#1280A6;padding:20px;font-weight:bold">{{datum.UPDATE_DATE}}</td>
+                <!-- <td style="color:#1280A6;padding:20px;font-weight:bold">{{datum.UPDATED_BY}}</td> -->
+            </tr>
+
+            <tr *ngFor="let datum of dataCRGUID">
+                <td style="color:#1280A6;padding:20px;font-weight:bold"><a (click)="getByProspectID(datum.PROSPECT_REFERENCE_ID)">{{datum.PROSPECT_REFERENCE_ID}}</a></td>
+                <td style="color:#1280A6;padding:20px;font-weight:bold">{{datum.PROSPECT_REFERENCE_NAME}}</td>
+                <td style="color:#1280A6;padding:20px;font-weight:bold">{{datum.OFFER_ID}}</td>
+                <td style="color:#1280A6;padding:20px;font-weight:bold">{{datum.UPDATE_DATE}}</td>
+                <!-- <td style="color:#1280A6;padding:20px;font-weight:bold">{{datum.UPDATED_BY}}</td> -->
+            </tr>
+        </table>
+
+    </div>
+</div>
